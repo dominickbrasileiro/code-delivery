@@ -16,6 +16,10 @@ type Route struct {
 	Positions []Position `json:"positions"`
 }
 
+func NewRoute() *Route {
+	return &Route{}
+}
+
 type Position struct {
 	Lat  float64
 	Long float64
