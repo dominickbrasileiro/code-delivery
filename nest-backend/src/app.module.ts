@@ -15,4 +15,3 @@ import { RoutesModule } from './routes/routes.module';
   providers: [AppService],
 })
 export class AppModule {}
-console.log(process.env.MONGO_DSN);
