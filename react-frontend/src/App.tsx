@@ -1,7 +1,13 @@
-function App() {
+import { CssBaseline, MuiThemeProvider } from "@material-ui/core";
+import { Mapping } from "./components/Mapping";
+import { theme } from "./theme";
+
+export const App = () => {
   return (
-    <h1>Hello, Code Delivery!</h1>
+    <MuiThemeProvider theme={theme}>
+      <CssBaseline />
+      <Mapping />
+    </MuiThemeProvider>
   );
 }
 
-export default App;
