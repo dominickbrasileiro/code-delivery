@@ -1,13 +1,13 @@
 import { Button, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { Loader } from "google-maps";
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, FunctionComponent, useCallback, useEffect, useRef, useState } from "react";
 import { getCurrentPosition } from "../utils/geolocation";
 import { makeCarIcon, makeMarkerIcon, Map } from "../utils/map";
 import { Route } from "../utils/models";
 
 const googleMapsLoader = new Loader(process.env.REACT_APP_GOOGLE_API_KEY)
 
-export const Mapping = () => {
+export const Mapping: FunctionComponent = () => {
   const [routes, setRoutes] = useState<Route[]>();
   const [selectedRouteId, setSelectedRouteId] = useState<string>("");
 
