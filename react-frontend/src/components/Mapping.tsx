@@ -7,11 +7,11 @@ export const Mapping = () => {
   const [selectedRouteId, setSelectedRouteId] = useState<string>("");
 
   useEffect(() => {
-    fetch("http://localhost:4000/routes", {
+    fetch(`${process.env.REACT_APP_API_URL}/routes`, {
       method: "GET",
     })
-    .then(res => res.json())
-    .then(json => setRoutes(json))
+      .then(res => res.json())
+      .then(json => setRoutes(json))
   }, []);
 
   const startRoute = useCallback((e: FormEvent) => {
