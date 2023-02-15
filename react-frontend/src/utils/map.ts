@@ -6,11 +6,44 @@ export interface RouteOptions {
 export class Route {
   public currentMarker: google.maps.Marker
   public endMarker: google.maps.Marker
+  private directionsRenderer: google.maps.DirectionsRenderer
 
   constructor(options: RouteOptions) {
     const { currentMarkerOptions, endMarkerOptions } = options
     this.currentMarker = new google.maps.Marker(currentMarkerOptions)
     this.endMarker = new google.maps.Marker(endMarkerOptions)
+
+    this.directionsRenderer = new google.maps.DirectionsRenderer({
+      suppressMarkers: true,
+      polylineOptions: {
+        strokeColor: (this.currentMarker.getIcon() as google.maps.ReadonlySymbol).strokeColor,
+        strokeOpacity: 0.5,
+        strokeWeight: 5,
+      }
+    })
+
+    this.directionsRenderer.setMap(
+      this.currentMarker.getMap() as google.maps.Map,
+    )
+
+    this.calculateRoute()
+  }
+
+  private calculateRoute(): void {
+    const currentPosition = this.currentMarker.getPosition()
+    const endPosition = this.endMarker.getPosition()
+
+    new google.maps.DirectionsService().route({
+      origin: currentPosition!,
+      destination: endPosition!,
+      travelMode: google.maps.TravelMode.DRIVING,
+    }, (result, status) => {
+      if (status === "OK") {
+        this.directionsRenderer.setDirections(result)
+      }
+
+      throw new Error(status)
+    })
   }
 }
 
@@ -23,10 +56,10 @@ export class Map {
     this.map = new google.maps.Map(element, options)
   }
 
-  addRoute(
+  public addRoute(
     id: string,
     options: RouteOptions,
-  ) {
+  ): void {
     this.routes[id] = new Route({
       currentMarkerOptions: {
         ...options.currentMarkerOptions,
@@ -37,6 +70,20 @@ export class Map {
         map: this.map,
       },
     })
+
+    this.fitBounds()
+  }
+
+  private fitBounds(): void {
+    const bounds = new google.maps.LatLngBounds()
+
+    Object.keys(this.routes).forEach((id) => {
+      const route = this.routes[id]
+      bounds.extend(route.currentMarker.getPosition() as any)
+      bounds.extend(route.endMarker.getPosition() as any)
+    })
+
+    this.map.fitBounds(bounds)
   }
 }
 
