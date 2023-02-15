@@ -31,6 +31,12 @@ export class Route {
     this.calculateRoute()
   }
 
+  public delete(): void {
+    this.currentMarker.setMap(null)
+    this.endMarker.setMap(null)
+    this.directionsRenderer.setMap(null)
+  }
+
   private calculateRoute(): void {
     const currentPosition = this.currentMarker.getPosition()
     const endPosition = this.endMarker.getPosition()
@@ -79,6 +85,12 @@ export class Map {
     })
 
     this.fitBounds()
+  }
+
+  public removeRoute(id: string): void {
+    const route = this.routes[id]
+    route.delete()
+    delete this.routes[id]
   }
 
   public moveCurrentMarker(id: string, position: google.maps.LatLngLiteral): void {
