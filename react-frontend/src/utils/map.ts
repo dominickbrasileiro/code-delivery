@@ -81,6 +81,10 @@ export class Map {
     this.fitBounds()
   }
 
+  public moveCurrentMarker(id: string, position: google.maps.LatLngLiteral): void {
+    this.routes[id].currentMarker.setPosition(position)
+  }
+
   private fitBounds(): void {
     const bounds = new google.maps.LatLngBounds()
 

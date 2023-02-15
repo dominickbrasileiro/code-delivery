@@ -7,6 +7,7 @@ import { getCurrentPosition } from "../utils/geolocation";
 import { makeCarIcon, makeMarkerIcon, Map } from "../utils/map";
 import { Route } from "../utils/models";
 import { NavBar } from "./NavBar";
+import { io, Socket } from 'socket.io-client'
 
 const googleMapsLoader = new Loader(process.env.REACT_APP_GOOGLE_API_KEY)
 
@@ -45,9 +46,25 @@ export const Mapping: FunctionComponent = () => {
   const [selectedRouteId, setSelectedRouteId] = useState<string>("");
 
   const mapRef = useRef<Map>()
+  const ioRef = useRef<Socket>()
 
   const { enqueueSnackbar } = useSnackbar()
   const styles = useStyles()
+
+  useEffect(() => {
+    ioRef.current = io(process.env.REACT_APP_API_URL as string)
+    ioRef.current.on("connect", () => console.log("socket.io connected"))
+    ioRef.current.on("new-position", (payload: {
+      routeId: string;
+      position: [number, number];
+      finished: boolean;
+    }) => {
+      mapRef.current?.moveCurrentMarker(payload.routeId, {
+        lat: payload.position[0],
+        lng: payload.position[1]
+      })
+    })
+  })
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/routes`, {
@@ -55,7 +72,7 @@ export const Mapping: FunctionComponent = () => {
     })
       .then(res => res.json())
       .then(json => setRoutes(json))
-  }, []);
+  }, [])
 
   useEffect(() => {
     (async () => {
@@ -86,6 +103,11 @@ export const Mapping: FunctionComponent = () => {
 
     const idx = routes.findIndex((route) => route.id === selectedRouteId)
     const route = routes[idx]
+
+    if (!route) {
+      return
+    }
+
     const randomColor = colors[idx % colors.length]
 
     try {
@@ -104,6 +126,10 @@ export const Mapping: FunctionComponent = () => {
             lng: route.endPosition.long,
           },
         },
+      })
+
+      ioRef.current?.emit("new-direction", {
+        routeId: selectedRouteId,
       })
     } catch (error) {
       if (error instanceof RouteExistsError) {
