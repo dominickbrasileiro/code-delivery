@@ -7,6 +7,19 @@ import { Route } from "../utils/models";
 
 const googleMapsLoader = new Loader(process.env.REACT_APP_GOOGLE_API_KEY)
 
+const colors = [
+  "#b71c1c",
+  "#4a148c",
+  "#2e7d32",
+  "#e65100",
+  "#2962ff",
+  "#c2185b",
+  "#FFCD00",
+  "#3e2723",
+  "#03a9f4",
+  "#827717",
+];
+
 export const Mapping: FunctionComponent = () => {
   const [routes, setRoutes] = useState<Route[]>();
   const [selectedRouteId, setSelectedRouteId] = useState<string>("");
@@ -43,26 +56,31 @@ export const Mapping: FunctionComponent = () => {
   const startRoute = useCallback((e: FormEvent) => {
     e.preventDefault()
 
-    const route = routes?.find((route) => route.id === selectedRouteId)
-
-    if (route) {
-      mapRef.current?.addRoute(route.id, {
-        currentMarkerOptions: {
-          icon: makeCarIcon("#000"),
-          position: {
-            lat: route.startPosition.lat,
-            lng: route.startPosition.long,
-          },
-        },
-        endMarkerOptions: {
-          icon: makeMarkerIcon("#454545"),
-          position: {
-            lat: route.endPosition.lat,
-            lng: route.endPosition.long,
-          },
-        },
-      })
+    if (!routes) {
+      return
     }
+
+
+    const idx = routes.findIndex((route) => route.id === selectedRouteId)
+    const route = routes[idx]
+    const randomColor = colors[idx % colors.length]
+
+    mapRef.current?.addRoute(route.id, {
+      currentMarkerOptions: {
+        icon: makeCarIcon(randomColor),
+        position: {
+          lat: route.startPosition.lat,
+          lng: route.startPosition.long,
+        },
+      },
+      endMarkerOptions: {
+        icon: makeMarkerIcon(randomColor),
+        position: {
+          lat: route.endPosition.lat,
+          lng: route.endPosition.long,
+        },
+      },
+    })
   }, [routes, selectedRouteId])
 
   return (
