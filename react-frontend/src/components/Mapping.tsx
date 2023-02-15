@@ -1,4 +1,4 @@
-import { Button, FormControl, Grid, InputLabel, makeStyles, MenuItem, Select } from "@material-ui/core";
+import { alpha, Button, FormControl, Grid, InputLabel, makeStyles, MenuItem, Select } from "@material-ui/core";
 import { Loader } from "google-maps";
 import { useSnackbar } from "notistack";
 import { FormEvent, FunctionComponent, useCallback, useEffect, useRef, useState } from "react";
@@ -6,6 +6,7 @@ import { RouteExistsError } from "../errors/route-exists-error";
 import { getCurrentPosition } from "../utils/geolocation";
 import { makeCarIcon, makeMarkerIcon, Map } from "../utils/map";
 import { Route } from "../utils/models";
+import { NavBar } from "./NavBar";
 
 const googleMapsLoader = new Loader(process.env.REACT_APP_GOOGLE_API_KEY)
 
@@ -22,10 +23,13 @@ const colors = [
   "#827717",
 ];
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
     height: "100%",
+  },
+  sidebar: {
+    borderRight: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`
   },
   form: {
     margin: "16px"
@@ -34,7 +38,7 @@ const useStyles = makeStyles({
     textAlign: "center",
     marginTop: "8px",
   },
-})
+}))
 
 export const Mapping: FunctionComponent = () => {
   const [routes, setRoutes] = useState<Route[]>();
@@ -116,12 +120,10 @@ export const Mapping: FunctionComponent = () => {
   return (
     <Grid
       container
-      style={{
-        width: "100%",
-        height: "100%",
-      }}
+      className={styles.root}
     >
-      <Grid item xs={12} sm={3} className={styles.root}>
+      <Grid item xs={12} sm={3} className={styles.sidebar}>
+        <NavBar></NavBar>
         <form onSubmit={startRoute} className={styles.form}>
           <FormControl
             fullWidth
