@@ -1,6 +1,8 @@
-import { Button, FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
+import { Button, FormControl, Grid, InputLabel, makeStyles, MenuItem, Select } from "@material-ui/core";
 import { Loader } from "google-maps";
+import { useSnackbar } from "notistack";
 import { FormEvent, FunctionComponent, useCallback, useEffect, useRef, useState } from "react";
+import { RouteExistsError } from "../errors/route-exists-error";
 import { getCurrentPosition } from "../utils/geolocation";
 import { makeCarIcon, makeMarkerIcon, Map } from "../utils/map";
 import { Route } from "../utils/models";
@@ -20,11 +22,28 @@ const colors = [
   "#827717",
 ];
 
+const useStyles = makeStyles({
+  root: {
+    width: "100%",
+    height: "100%",
+  },
+  form: {
+    margin: "16px"
+  },
+  btnSubmitWrapper: {
+    textAlign: "center",
+    marginTop: "8px",
+  },
+})
+
 export const Mapping: FunctionComponent = () => {
   const [routes, setRoutes] = useState<Route[]>();
   const [selectedRouteId, setSelectedRouteId] = useState<string>("");
 
   const mapRef = useRef<Map>()
+
+  const { enqueueSnackbar } = useSnackbar()
+  const styles = useStyles()
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/routes`, {
@@ -65,23 +84,34 @@ export const Mapping: FunctionComponent = () => {
     const route = routes[idx]
     const randomColor = colors[idx % colors.length]
 
-    mapRef.current?.addRoute(route.id, {
-      currentMarkerOptions: {
-        icon: makeCarIcon(randomColor),
-        position: {
-          lat: route.startPosition.lat,
-          lng: route.startPosition.long,
+    try {
+      mapRef.current?.addRoute(route.id, {
+        currentMarkerOptions: {
+          icon: makeCarIcon(randomColor),
+          position: {
+            lat: route.startPosition.lat,
+            lng: route.startPosition.long,
+          },
         },
-      },
-      endMarkerOptions: {
-        icon: makeMarkerIcon(randomColor),
-        position: {
-          lat: route.endPosition.lat,
-          lng: route.endPosition.long,
+        endMarkerOptions: {
+          icon: makeMarkerIcon(randomColor),
+          position: {
+            lat: route.endPosition.lat,
+            lng: route.endPosition.long,
+          },
         },
-      },
-    })
-  }, [routes, selectedRouteId])
+      })
+    } catch (error) {
+      if (error instanceof RouteExistsError) {
+        enqueueSnackbar("Route already started.", {
+          variant: "error",
+        })
+        return
+      }
+
+      throw error
+    }
+  }, [routes, selectedRouteId, enqueueSnackbar])
 
   return (
     <Grid
@@ -91,8 +121,8 @@ export const Mapping: FunctionComponent = () => {
         height: "100%",
       }}
     >
-      <Grid item xs={12} sm={3}>
-        <form onSubmit={startRoute}>
+      <Grid item xs={12} sm={3} className={styles.root}>
+        <form onSubmit={startRoute} className={styles.form}>
           <FormControl
             fullWidth
           >
@@ -113,14 +143,16 @@ export const Mapping: FunctionComponent = () => {
                 </MenuItem>
               ))}
             </Select>
-            <Button
-              type="submit"
-              color="primary"
-              variant="contained"
-              fullWidth
-            >
-              Start route
-            </Button>
+            <div className={styles.btnSubmitWrapper}>
+              <Button
+                type="submit"
+                color="primary"
+                variant="contained"
+                fullWidth
+              >
+                Start route
+              </Button>
+            </div>
           </FormControl>
         </form>
       </Grid>

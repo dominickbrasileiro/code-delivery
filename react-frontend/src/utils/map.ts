@@ -1,3 +1,5 @@
+import { RouteExistsError } from "../errors/route-exists-error"
+
 export interface RouteOptions {
   currentMarkerOptions: google.maps.ReadonlyMarkerOptions,
   endMarkerOptions: google.maps.ReadonlyMarkerOptions,
@@ -40,6 +42,7 @@ export class Route {
     }, (result, status) => {
       if (status === "OK") {
         this.directionsRenderer.setDirections(result)
+        return
       }
 
       throw new Error(status)
@@ -60,6 +63,10 @@ export class Map {
     id: string,
     options: RouteOptions,
   ): void {
+    if (id in this.routes) {
+      throw new RouteExistsError()
+    }
+
     this.routes[id] = new Route({
       currentMarkerOptions: {
         ...options.currentMarkerOptions,
