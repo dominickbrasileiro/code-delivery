@@ -4,6 +4,7 @@ import { RoutesController } from './routes.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Route, RouteSchema } from './entities/route.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { RoutesGateway } from './routes.gateway';
 
 @Module({
   imports: [
@@ -39,6 +40,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     ]),
   ],
   controllers: [RoutesController],
-  providers: [RoutesService],
+  providers: [RoutesService, RoutesGateway],
 })
 export class RoutesModule {}
