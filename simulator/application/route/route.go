@@ -68,7 +68,7 @@ func (r *Route) ExportPositionsJson() ([]string, error) {
 	}
 	total := len(r.Positions)
 	for k, v := range r.Positions {
-		route.Position = [2]float64{v.Lat, v.Long}
+		route.Position = [2]float64{v.Long, v.Lat}
 		if k == total-1 {
 			route.Finished = true
 		}
