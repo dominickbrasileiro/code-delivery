@@ -148,8 +148,8 @@ export const Mapping: FunctionComponent = () => {
       finished: boolean;
     }) => {
       mapRef.current?.moveCurrentMarker(payload.routeId, {
-        lat: payload.position[0],
-        lng: payload.position[1]
+        lng: payload.position[0],
+        lat: payload.position[1],
       })
 
       if (payload.finished) {
